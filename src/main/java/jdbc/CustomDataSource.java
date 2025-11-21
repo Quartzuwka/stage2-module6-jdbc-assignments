@@ -41,10 +41,10 @@ public class CustomDataSource implements DataSource {
     // Реализация Singleton с Double-Checked Locking и чтением пропертей
     public static CustomDataSource getInstance() {
             instance = new CustomDataSource(
-                    PropertiesUtil.getByKey("postgres.driver"),
-                    PropertiesUtil.getByKey("postgres.url"),
-                    PropertiesUtil.getByKey("postgres.password"),
-                    PropertiesUtil.getByKey("postgres.name")
+                    PropertiesUtil.getByKey("h2.driver"),
+                    PropertiesUtil.getByKey("h2.url"),
+                    PropertiesUtil.getByKey("h2.password"),
+                    PropertiesUtil.getByKey("h2.name")
             );
         return instance;
     }
