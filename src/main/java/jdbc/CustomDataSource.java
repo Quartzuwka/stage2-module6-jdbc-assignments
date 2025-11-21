@@ -40,12 +40,18 @@ public class CustomDataSource implements DataSource {
 
     // Реализация Singleton с Double-Checked Locking и чтением пропертей
     public static CustomDataSource getInstance() {
-            instance = new CustomDataSource(
-                    PropertiesUtil.getByKey("h2.driver"),
-                    PropertiesUtil.getByKey("h2.url"),
-                    PropertiesUtil.getByKey("h2.password"),
-                    PropertiesUtil.getByKey("h2.name")
-            );
+        if (instance == null) {
+            synchronized (CustomDataSource.class) {
+                if (instance == null) {
+                    instance = new CustomDataSource(
+                            PropertiesUtil.getByKey("h2.driver"),
+                            PropertiesUtil.getByKey("h2.url"),
+                            PropertiesUtil.getByKey("h2.password"),
+                            PropertiesUtil.getByKey("h2.name")
+                    );
+                }
+            }
+        }
         return instance;
     }
 
@@ -107,15 +113,21 @@ public class CustomDataSource implements DataSource {
             return PROPERTIES.getProperty(key);
         }
 
+        // In CustomDataSource.java inside PropertiesUtil class
+
         private static void loadProperties() {
-            try(InputStream inputStream = PropertiesUtil.class.getClassLoader().getResourceAsStream("app.properties")) {
+            // Use explicit checks
+            try (InputStream inputStream = PropertiesUtil.class.getClassLoader().getResourceAsStream("app.properties")) {
+                if (inputStream == null) {
+                    // This will clearly tell you if the file is not found in the classpath
+                    throw new RuntimeException("CRITICAL ERROR: 'app.properties' not found in classpath. Try Rebuilding the Project.");
+                }
                 PROPERTIES.load(inputStream);
-            } catch (Throwable e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load app.properties", e);
             }
-
-
         }
+
 
     }
 }
