@@ -20,11 +20,11 @@ public class SimpleJDBCRepository {
     private PreparedStatement ps = null;
     private Statement st = null;
 
-    private static final String createUserSQL = "INSERT INTO myusers (first_name, last_name, age) VALUES (?,?,?)";
-    private static final String updateUserSQL = "UPDATE myusers SET first_name=?, last_name=?, age=? WHERE ID = ?";
-    private static final String deleteUser = "DELETE FROM myusers WHERE id = ?";
-    private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE id = ?";
-    private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE first_name = ?";
+    private static final String createUserSQL = "INSERT INTO myusers (FIRST_NAME, LAST_NAME, AGE) VALUES (?,?,?)";
+    private static final String updateUserSQL = "UPDATE myusers SET FIRST_NAME=?, LAST_NAME=?, AGE=? WHERE ID = ?";
+    private static final String deleteUser = "DELETE FROM myusers WHERE ID = ?";
+    private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE ID = ?";
+    private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE FIRST_NAME = ?";
     private static final String findAllUserSQL = "SELECT * FROM myusers";
 
     public Long createUser(User argUser) {
@@ -41,7 +41,6 @@ public class SimpleJDBCRepository {
 
             ResultSet keys = ps.getGeneratedKeys();
             if (keys.next()) {
-                // Возвращаем значение первой колонки (это и есть наш ID)
                 return keys.getLong(1);
             } else {
                 throw new SQLException("ID not generated");
@@ -63,7 +62,7 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
+                user = new User(resultSet.getLong("ID"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
 
                 );
             }
@@ -86,7 +85,7 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
+                user = new User(resultSet.getLong("id"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
 
                 );
             }
@@ -106,7 +105,7 @@ public class SimpleJDBCRepository {
             User user = null;
             ArrayList<User> arr = new ArrayList<>();
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
+                user = new User(resultSet.getLong("ID"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
 
                 );
                 arr.add(user);
