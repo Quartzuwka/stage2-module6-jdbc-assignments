@@ -20,23 +20,25 @@ public class SimpleJDBCRepository {
     private PreparedStatement ps = null;
     private Statement st = null;
 
-    private static final String createUserSQL = "INSERT INTO myusers (first_name, last_name, age) VALUES ('Sam', 'Kvashnin', 20)";
+    private static final String createUserSQL = "INSERT INTO myusers (first_name, last_name, age) VALUES (?,?,?)";
     private static final String updateUserSQL = "";
     private static final String deleteUser = "DELETE FROM myusers WHERE id = ?";
     private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE id = ?";
     private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE first_name = ?";
     private static final String findAllUserSQL = "SELECT * FROM myusers";
 
-    public Long createUser() {
+    public Long createUser(User argUser) {
 
 
         try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS);
 
+            ps.setString(1, argUser.getFirstName());
+            ps.setString(2, argUser.getLastName());
+            ps.setInt(3, argUser.getAge());
             ps.executeUpdate();
 
-            // 2. Достаем сгенерированный ID
             ResultSet keys = ps.getGeneratedKeys();
             if (keys.next()) {
                 // Возвращаем значение первой колонки (это и есть наш ID)
