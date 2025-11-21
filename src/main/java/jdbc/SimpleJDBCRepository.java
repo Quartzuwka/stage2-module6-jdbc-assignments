@@ -6,9 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -21,28 +20,125 @@ public class SimpleJDBCRepository {
     private PreparedStatement ps = null;
     private Statement st = null;
 
-    private static final String createUserSQL = "";
+    private static final String createUserSQL = "INSERT INTO myusers (first_name, last_name, age) VALUES ('Sam', 'Kvashnin', 20)";
     private static final String updateUserSQL = "";
-    private static final String deleteUser = "";
-    private static final String findUserByIdSQL = "";
-    private static final String findUserByNameSQL = "";
-    private static final String findAllUserSQL = "";
+    private static final String deleteUser = "DELETE FROM myusers WHERE id = ?";
+    private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE id = ?";
+    private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE first_name = ?";
+    private static final String findAllUserSQL = "SELECT * FROM myusers";
 
     public Long createUser() {
+
+
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS);
+
+            ps.executeUpdate();
+
+            // 2. Достаем сгенерированный ID
+            ResultSet keys = ps.getGeneratedKeys();
+            if (keys.next()) {
+                // Возвращаем значение первой колонки (это и есть наш ID)
+                return keys.getLong(1);
+            } else {
+                throw new SQLException("ID not generated");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public User findUserById(Long userId) {
+
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(findUserByIdSQL);
+            ps.setLong(1, userId);
+            ResultSet resultSet = ps.executeQuery();
+            User user = null;
+
+            while (resultSet.next()) {
+                user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
+
+                );
+            }
+            return user;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
     public User findUserByName(String userName) {
+
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(findUserByNameSQL);
+            ps.setString(1, userName);
+            ResultSet resultSet = ps.executeQuery();
+            User user = null;
+
+            while (resultSet.next()) {
+                user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
+
+                );
+            }
+            return user;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public List<User> findAllUser() {
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(findAllUserSQL);
+            ResultSet resultSet = ps.executeQuery();
+            User user = null;
+            ArrayList<User> arr = new ArrayList<>();
+            while (resultSet.next()) {
+                user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
+
+                );
+                arr.add(user);
+            }
+            return arr;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public User updateUser() {
-    }
+//    public User updateUser() {
+//    }
 
     private void deleteUser(Long userId) {
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(deleteUser);
+            ResultSet resultSet = ps.executeQuery();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
