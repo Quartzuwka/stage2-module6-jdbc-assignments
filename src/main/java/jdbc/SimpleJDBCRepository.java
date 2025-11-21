@@ -19,7 +19,7 @@ public class SimpleJDBCRepository {
     private PreparedStatement ps = null;
     private Statement st = null;
 
-    // FIX 1: Use escaped quotes (\") to force lowercase column names matching the H2 2.x schema
+    // FIX 1: Use escaped quotes (\"...\") to match H2 schema case-sensitivity
     private static final String createUserSQL = "INSERT INTO myusers (\"first_name\", \"last_name\", \"age\") VALUES (?,?,?)";
     private static final String updateUserSQL = "UPDATE myusers SET \"first_name\"=?, \"last_name\"=?, \"age\"=? WHERE \"id\" = ?";
     private static final String deleteUser = "DELETE FROM myusers WHERE \"id\" = ?";
@@ -58,15 +58,13 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                // FIX: Use quoted column names in resultSet getters if strictly necessary,
-                // though usually standard getters handle casing leniently.
-                // If this fails, change to resultSet.getString("first_name")
-                user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
-                );
+                // Use exact column names if necessary, or standard getters usually work
+                user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .firstName(resultSet.getString("first_name"))
+                        .lastName(resultSet.getString("last_name"))
+                        .age(resultSet.getInt("age"))
+                        .build();
             }
             return user;
 
@@ -84,12 +82,12 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
-                );
+                user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .firstName(resultSet.getString("first_name"))
+                        .lastName(resultSet.getString("last_name"))
+                        .age(resultSet.getInt("age"))
+                        .build();
             }
             return user;
 
@@ -105,12 +103,12 @@ public class SimpleJDBCRepository {
             ResultSet resultSet = ps.executeQuery();
             ArrayList<User> arr = new ArrayList<>();
             while (resultSet.next()) {
-                User user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
-                );
+                User user = User.builder()
+                        .id(resultSet.getLong("id"))
+                        .firstName(resultSet.getString("first_name"))
+                        .lastName(resultSet.getString("last_name"))
+                        .age(resultSet.getInt("age"))
+                        .build();
                 arr.add(user);
             }
             return arr;
@@ -141,7 +139,7 @@ public class SimpleJDBCRepository {
 
             PreparedStatement ps = connection1.prepareStatement(deleteUser);
             ps.setLong(1, userId);
-            // FIX 2: Use executeUpdate() for DELETE operations, not executeQuery()
+            // FIX 2: Use executeUpdate() for DELETE
             ps.executeUpdate();
 
         } catch (Exception e) {
