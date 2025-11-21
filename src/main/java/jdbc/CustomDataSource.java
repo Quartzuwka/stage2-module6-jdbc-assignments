@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 @Getter
@@ -93,5 +94,28 @@ public class CustomDataSource implements DataSource {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
+    }
+    public class PropertiesUtil {
+
+        private static final Properties PROPERTIES = new Properties();
+
+        static {
+            loadProperties();
+        }
+
+        public static String getByKey(String key) {
+            return PROPERTIES.getProperty(key);
+        }
+
+        private static void loadProperties() {
+            try(InputStream inputStream = PropertiesUtil.class.getClassLoader().getResourceAsStream("app.properties")) {
+                PROPERTIES.load(inputStream);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+
+
+        }
+
     }
 }
