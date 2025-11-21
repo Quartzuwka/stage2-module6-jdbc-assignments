@@ -21,7 +21,7 @@ public class SimpleJDBCRepository {
     private Statement st = null;
 
     private static final String createUserSQL = "INSERT INTO myusers (first_name, last_name, age) VALUES (?,?,?)";
-    private static final String updateUserSQL = "";
+    private static final String updateUserSQL = "UPDATE myusers SET first_name=?, last_name=?, age=? WHERE ID = ?";
     private static final String deleteUser = "DELETE FROM myusers WHERE id = ?";
     private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE id = ?";
     private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE first_name = ?";
@@ -63,11 +63,7 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
+                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
 
                 );
             }
@@ -90,11 +86,7 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
+                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
 
                 );
             }
@@ -114,11 +106,7 @@ public class SimpleJDBCRepository {
             User user = null;
             ArrayList<User> arr = new ArrayList<>();
             while (resultSet.next()) {
-                user = new User(
-                        resultSet.getLong("id"),
-                        resultSet.getString("first_name"),
-                        resultSet.getString("last_name"),
-                        resultSet.getInt("age")
+                user = new User(resultSet.getLong("id"), resultSet.getString("first_name"), resultSet.getString("last_name"), resultSet.getInt("age")
 
                 );
                 arr.add(user);
@@ -130,10 +118,25 @@ public class SimpleJDBCRepository {
         }
     }
 
-//    public User updateUser() {
-//    }
+    public void updateUser(User argUser) {
 
-    private void deleteUser(Long userId) {
+        try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
+
+            PreparedStatement ps = connection1.prepareStatement(updateUserSQL);
+
+            ps.setString(1, argUser.getFirstName());
+            ps.setString(2, argUser.getLastName());
+            ps.setInt(3, argUser.getAge());
+            ps.setLong(4, argUser.getId());
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void deleteUser(Long userId) {
         try (Connection connection1 = CustomConnector.getConnection(PropertiesUtil.getByKey("postgres.url"), PropertiesUtil.getByKey("postgres.user"), PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(deleteUser);
