@@ -30,7 +30,7 @@ public class SimpleJDBCRepository {
     public Long createUser(User argUser) {
 
 
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS);
 
@@ -55,7 +55,7 @@ public class SimpleJDBCRepository {
 
     public User findUserById(Long userId) {
 
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(findUserByIdSQL);
             ps.setLong(1, userId);
@@ -78,7 +78,7 @@ public class SimpleJDBCRepository {
 
     public User findUserByName(String userName) {
 
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(findUserByNameSQL);
             ps.setString(1, userName);
@@ -99,7 +99,7 @@ public class SimpleJDBCRepository {
     }
 
     public List<User> findAllUser() {
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(findAllUserSQL);
             ResultSet resultSet = ps.executeQuery();
@@ -120,7 +120,7 @@ public class SimpleJDBCRepository {
 
     public void updateUser(User argUser) {
 
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(updateUserSQL);
 
@@ -137,9 +137,10 @@ public class SimpleJDBCRepository {
     }
 
     public void deleteUser(Long userId) {
-        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.user"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
+        try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(deleteUser);
+            ps.setLong(1, userId);
             ResultSet resultSet = ps.executeQuery();
 
         } catch (Exception e) {
