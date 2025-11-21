@@ -1,6 +1,5 @@
 package jdbc;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,16 +19,15 @@ public class SimpleJDBCRepository {
     private PreparedStatement ps = null;
     private Statement st = null;
 
-    private static final String createUserSQL = "INSERT INTO myusers (FIRST_NAME, LAST_NAME, AGE) VALUES (?,?,?)";
-    private static final String updateUserSQL = "UPDATE myusers SET FIRST_NAME=?, LAST_NAME=?, AGE=? WHERE ID = ?";
-    private static final String deleteUser = "DELETE FROM myusers WHERE ID = ?";
-    private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE ID = ?";
-    private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE FIRST_NAME = ?";
+    // FIX 1: Use escaped quotes (\") to force lowercase column names matching the H2 2.x schema
+    private static final String createUserSQL = "INSERT INTO myusers (\"first_name\", \"last_name\", \"age\") VALUES (?,?,?)";
+    private static final String updateUserSQL = "UPDATE myusers SET \"first_name\"=?, \"last_name\"=?, \"age\"=? WHERE \"id\" = ?";
+    private static final String deleteUser = "DELETE FROM myusers WHERE \"id\" = ?";
+    private static final String findUserByIdSQL = "SELECT * FROM myusers WHERE \"id\" = ?";
+    private static final String findUserByNameSQL = "SELECT * FROM myusers WHERE \"first_name\" = ?";
     private static final String findAllUserSQL = "SELECT * FROM myusers";
 
     public Long createUser(User argUser) {
-
-
         try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(createUserSQL, Statement.RETURN_GENERATED_KEYS);
@@ -49,11 +47,9 @@ public class SimpleJDBCRepository {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public User findUserById(Long userId) {
-
         try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(findUserByIdSQL);
@@ -62,8 +58,14 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("ID"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
-
+                // FIX: Use quoted column names in resultSet getters if strictly necessary,
+                // though usually standard getters handle casing leniently.
+                // If this fails, change to resultSet.getString("first_name")
+                user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
                 );
             }
             return user;
@@ -71,12 +73,9 @@ public class SimpleJDBCRepository {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
     }
 
     public User findUserByName(String userName) {
-
         try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(findUserByNameSQL);
@@ -85,8 +84,11 @@ public class SimpleJDBCRepository {
             User user = null;
 
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("id"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
-
+                user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
                 );
             }
             return user;
@@ -94,7 +96,6 @@ public class SimpleJDBCRepository {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public List<User> findAllUser() {
@@ -102,11 +103,13 @@ public class SimpleJDBCRepository {
 
             PreparedStatement ps = connection1.prepareStatement(findAllUserSQL);
             ResultSet resultSet = ps.executeQuery();
-            User user = null;
             ArrayList<User> arr = new ArrayList<>();
             while (resultSet.next()) {
-                user = new User(resultSet.getLong("ID"), resultSet.getString("FIRST_NAME"), resultSet.getString("LAST_NAME"), resultSet.getInt("AGE")
-
+                User user = new User(
+                        resultSet.getLong("id"),
+                        resultSet.getString("first_name"),
+                        resultSet.getString("last_name"),
+                        resultSet.getInt("age")
                 );
                 arr.add(user);
             }
@@ -118,7 +121,6 @@ public class SimpleJDBCRepository {
     }
 
     public void updateUser(User argUser) {
-
         try (Connection connection1 = CustomConnector.getConnection(CustomDataSource.PropertiesUtil.getByKey("postgres.url"), CustomDataSource.PropertiesUtil.getByKey("postgres.name"), CustomDataSource.PropertiesUtil.getByKey("postgres.password"))) {
 
             PreparedStatement ps = connection1.prepareStatement(updateUserSQL);
@@ -132,7 +134,6 @@ public class SimpleJDBCRepository {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
     public void deleteUser(Long userId) {
@@ -140,7 +141,8 @@ public class SimpleJDBCRepository {
 
             PreparedStatement ps = connection1.prepareStatement(deleteUser);
             ps.setLong(1, userId);
-            ResultSet resultSet = ps.executeQuery();
+            // FIX 2: Use executeUpdate() for DELETE operations, not executeQuery()
+            ps.executeUpdate();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
